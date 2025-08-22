@@ -12,37 +12,41 @@ table_id = 0
 active_order_id = -1
 
 
-
 class MenuItem(ABC):
     def __init__(self, name, price):
         self._name = name
         self._price = price
-    
+
     def get_info(self):
         return f"{self._name}: ${self._price}"
-    
+
     def get_price(self):
         return self._price
-    
+
     def get_name(self):
         return self._name
+
 
 class Appetizer(MenuItem):
     def __init__(self, name, price):
         super().__init__(name, price)
 
+
 class MainCourse(MenuItem):
     def __init__(self, name, price):
         super().__init__(name, price)
+
 
 class Dessert(MenuItem):
     def __init__(self, name, price):
         super().__init__(name, price)
 
+
 class Beverage(MenuItem):
     def __init__(self, name, price, is_hot):
         super().__init__(name, price)
         self._is_hot = is_hot
+
 
 class Order:
     def __init__(self):
@@ -55,9 +59,9 @@ class Order:
 
     def add_item(self, item):
         self._items.append(item)
-        
+
     def show_order(self):
-        print(f"Order id: {self._order_id} \nTable id: {self._table_id}" )
+        print(f"Order id: {self._order_id} \nTable id: {self._table_id}")
         for item in self._items:
             print(item.get_info())
 
@@ -82,16 +86,16 @@ class Order:
     @property
     def table_id(self):
         return self._table_id
-    
+
     @is_active.setter
     def is_active(self, value):
         self._is_active = value
-    
+
     @table_id.setter
     def table_id(self, value):
         self._table_id = value
 
-    
+
 class Table():
     def __init__(self):
         global table_id
@@ -100,17 +104,17 @@ class Table():
         self._table_id = table_id
         self._orders = orders
         self._is_available = True
-    
+
     def show_orders(self):
-        print(f"Orders for table id {self._table_id}: {self._order_id}" )
+        print(f"Orders for table id {self._table_id}: {self._order_id}")
         for order in self._orders:
             print(order.show_order())
 
-    @property 
+    @property
     def table_id(self):
         return self._table_id
 
-    @property 
+    @property
     def is_available(self):
         return self._is_available
 
@@ -118,32 +122,39 @@ class Table():
     def is_available(self, value):
         self._is_available = value
 
+
 def init_appetizers():
     appetizers.append(Appetizer("Garlic bread", 9.99))
     appetizers.append(Appetizer("Olives", 7.99))
+
 
 def init_main_courses():
     main_courses.append(MainCourse("Pasta Carbonara", 19.99))
     main_courses.append(MainCourse("Fish and Chips", 27.99))
 
+
 def init_desserts():
     desserts.append(Dessert("Creme brulee", 12.99))
     desserts.append(Dessert("Ice Cream", 8.99))
+
 
 def init_beverages():
     beverages.append(Beverage("Water", 0.99, False))
     beverages.append(Beverage("Coffee", 4.99, True))
     beverages.append(Beverage("Lemonade", 1.99, True))
 
+
 def init_tables():
     tables.append(Table())
     tables.append(Table())
-    
+
+
 init_appetizers()
 init_main_courses()
 init_desserts()
 init_beverages()
-init_tables()        
+init_tables()
+
 
 def create_new_order():
     global orders
@@ -151,6 +162,7 @@ def create_new_order():
     order = Order()
     active_order_id = order.order_id
     orders.append(order)
+
 
 def find_order_by_id(order_id):
     global orders
@@ -161,9 +173,10 @@ def find_order_by_id(order_id):
             found = True
     if found:
         return index
-    else: 
+    else:
         return -1
-    
+
+
 def find_table_by_id(table_id):
     global tables
     found = False
@@ -173,14 +186,16 @@ def find_table_by_id(table_id):
             found = True
     if found:
         return index
-    else: 
-        return -1    
-    
+    else:
+        return -1
+
+
 def assign_table_to_order(table_id):
     global active_order_id
     order = orders[find_order_by_id(active_order_id)]
     order.table_id = table_id
     tables[find_table_by_id(table_id)].is_available = False
+
 
 def view_order():
     global orders
@@ -193,6 +208,7 @@ def view_order():
         print(f"Active order: {orders[index]._is_active}")
     else:
         print("Order not found")
+
 
 def update_order():
     global orders
@@ -211,6 +227,7 @@ def update_order():
     else:
         print("Order not found")
 
+
 def close_order():
     global orders
     print("Please enter order id: ")
@@ -228,7 +245,6 @@ def close_order():
         print("Order not found")
 
 
-    
 def print_menu(title, category, category_singular):
     while True:
         print(f"{title.title()}")
@@ -249,15 +265,16 @@ def print_menu(title, category, category_singular):
 def menu_confirmation(item):
     while True:
         print(f"Would you like to add {item.get_name()} to your order? (y/n)")
-        yesorno = input() 
+        yesorno = input()
         match yesorno:
             case "y":
                 orders[find_order_by_id(active_order_id)].add_item(item)
                 return
             case "n":
-                return    
+                return
             case _:
                 print("Invalid choice. Please choose y(es) or n(o).")
+
 
 def menu_main():
     while True:
@@ -284,10 +301,11 @@ def menu_main():
             case _:
                 print("invalid choice. Please enter a valid menu item.")
 
+
 def menu_tables():
     while True:
         available_tables = []
-        shown_tables ={}
+        shown_tables = {}
         for table in tables:
             if table.is_available:
                 available_tables.append(table)
@@ -310,6 +328,7 @@ def menu_tables():
             break
         else:
             print("Invalid choice. Please enter a valid menu item.")
+
 
 def menu_full():
     while True:
@@ -334,17 +353,22 @@ def menu_full():
             case _:
                 print("Invalid choice. Please enter a valid menu item.")
 
+
 def menu_appetizers():
     print_menu("Appetizers", appetizers, Appetizer)
+
 
 def menu_main_courses():
     print_menu("Main Courses", main_courses, MainCourse)
 
+
 def menu_desserts():
     print_menu("Desserts", desserts, Dessert)
 
+
 def menu_beverages():
     print_menu("Beverages", beverages, Beverage)
+
 
 while True:
     menu_main()
