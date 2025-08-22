@@ -13,45 +13,49 @@ active_order_id = -1
 
 
 class MenuItem(ABC):
-    def __init__(self, name, price):
+    def __init__(self, name, net_price):
         self._name = name
-        self._price = price
+        self._net_price = net_price
+        self._tax_rate = 0.12
 
     def get_info(self):
-        return f"{self._name}: ${self._price}"
+        return f"{self._name}: \t ${self._net_price} \t ({int(self._tax_rate*100)}%)"
 
     def get_price(self):
-        return self._price
+        return self._net_price
 
     def get_name(self):
         return self._name
 
+    def get_tax_rate(self):
+        return self._tax_rate
+
 
 class Appetizer(MenuItem):
-    def __init__(self, name, price):
-        super().__init__(name, price)
+    def __init__(self, name, net_price):
+        super().__init__(name, net_price)
 
 
 class MainCourse(MenuItem):
-    def __init__(self, name, price):
-        super().__init__(name, price)
+    def __init__(self, name, net_price):
+        super().__init__(name, net_price)
 
 
 class Dessert(MenuItem):
-    def __init__(self, name, price):
-        super().__init__(name, price)
+    def __init__(self, name, net_price):
+        super().__init__(name, net_price)
 
 
 class Beverage(MenuItem):
-    def __init__(self, name, price, is_hot):
-        super().__init__(name, price)
-        self._is_hot = is_hot
+    def __init__(self, name, net_price, is_alcoholic):
+        super().__init__(name, net_price)
+        self._is_alcoholic = is_alcoholic
+        self._tax_rate = (0.25 if is_alcoholic == True else 0.12)
 
 
 class Order:
     def __init__(self):
         global order_id
-        order_id += 1
         self._items = []
         self._order_id = order_id
         self._table_id = table_id
@@ -62,6 +66,7 @@ class Order:
 
     def show_order(self):
         print(f"Order id: {self._order_id} \nTable id: {self._table_id}")
+        print("Item \t Price \t Tax rate")
         for item in self._items:
             print(item.get_info())
 
@@ -104,6 +109,7 @@ class Table():
         self._table_id = table_id
         self._orders = orders
         self._is_available = True
+        self._current_order = Order()
 
     def show_orders(self):
         print(f"Orders for table id {self._table_id}: {self._order_id}")
@@ -121,6 +127,14 @@ class Table():
     @is_available.setter
     def is_available(self, value):
         self._is_available = value
+
+    @property
+    def current_order(self):
+        return self._current_order
+
+    @is_available.setter
+    def current_order(self, value):
+        self._current_order = value
 
 
 def init_appetizers():
@@ -140,8 +154,10 @@ def init_desserts():
 
 def init_beverages():
     beverages.append(Beverage("Water", 0.99, False))
-    beverages.append(Beverage("Coffee", 4.99, True))
-    beverages.append(Beverage("Lemonade", 1.99, True))
+    beverages.append(Beverage("Coffee", 4.99, False))
+    beverages.append(Beverage("Lemonade", 1.99, False))
+    beverages.append(Beverage("Wine", 10.99, True))
+    beverages.append(Beverage("Beer", 8.99, True))
 
 
 def init_tables():
@@ -154,14 +170,6 @@ init_main_courses()
 init_desserts()
 init_beverages()
 init_tables()
-
-
-def create_new_order():
-    global orders
-    global active_order_id
-    order = Order()
-    active_order_id = order.order_id
-    orders.append(order)
 
 
 def find_order_by_id(order_id):
@@ -190,14 +198,30 @@ def find_table_by_id(table_id):
         return -1
 
 
-def assign_table_to_order(table_id):
+def order_create(table_id):
+    global orders
     global active_order_id
-    order = orders[find_order_by_id(active_order_id)]
+    global order_id
+    order_id += 1
+    print(active_order_id)
+    order = Order()
+    print(active_order_id)
+    print(order.order_id)
     order.table_id = table_id
+    print(active_order_id)
+    print(order.order_id)
+
+    active_order_id = order.order_id
+    print(order.order_id)
+
+    print(active_order_id)
+
+    orders.append(order)
     tables[find_table_by_id(table_id)].is_available = False
+    tables[find_table_by_id(table_id)].active_order = order
 
 
-def view_order():
+def order_view():
     global orders
     print("Please enter order id: ")
     choice = input()
@@ -210,7 +234,7 @@ def view_order():
         print("Order not found")
 
 
-def update_order():
+def order_update():
     global orders
     print("Please enter order id: ")
     choice = input()
@@ -228,7 +252,7 @@ def update_order():
         print("Order not found")
 
 
-def close_order():
+def order_close():
     global orders
     print("Please enter order id: ")
     choice = input()
@@ -245,7 +269,7 @@ def close_order():
         print("Order not found")
 
 
-def show_active_orders():
+def order_show_active_orders():
     global orders
     print("Active orders: ")
     active_orders = []
@@ -302,17 +326,16 @@ def menu_main():
         choice = input()
         match choice:
             case "1":
-                create_new_order()
                 menu_tables()
                 menu_categories()
             case "2":
-                view_order()
+                order_view()
             case "3":
-                update_order()
+                order_update()
             case "4":
-                close_order()
+                order_close()
             case "5":
-                show_active_orders()
+                order_show_active_orders()
             case "0":
                 sys.exit()
             case _:
@@ -341,7 +364,7 @@ def menu_tables():
         if choice == "0":
             menu_main()
         elif choice.isdigit() and int(choice) <= len(available_tables):
-            assign_table_to_order(shown_tables.get(int(choice)))
+            order_create(shown_tables.get(int(choice)))
             break
         else:
             print("Invalid choice. Please enter a valid menu item.")
