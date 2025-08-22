@@ -223,7 +223,7 @@ def update_order():
         orders[index].show_order()
         print(f"Total: ${orders[index].get_total()}")
         print(active_order_id)
-        menu_full()
+        menu_categories()
     else:
         print("Order not found")
 
@@ -243,6 +243,20 @@ def close_order():
         orders[order_index].is_active = False
     else:
         print("Order not found")
+
+
+def show_active_orders():
+    global orders
+    print("Active orders: ")
+    active_orders = []
+    for order in orders:
+        if order.is_active == True:
+            active_orders.append(order)
+    if len(active_orders) != 0:
+        for order in active_orders:
+            order.show_order()
+    else:
+        print("There are no active orders")
 
 
 def print_menu(title, category, category_singular):
@@ -283,19 +297,22 @@ def menu_main():
         print("2. View order")
         print("3. Update order")
         print("4. Close order")
+        print("5. Show active orders")
         print("0. Quit")
         choice = input()
         match choice:
             case "1":
                 create_new_order()
                 menu_tables()
-                menu_full()
+                menu_categories()
             case "2":
                 view_order()
             case "3":
                 update_order()
             case "4":
                 close_order()
+            case "5":
+                show_active_orders()
             case "0":
                 sys.exit()
             case _:
@@ -330,7 +347,7 @@ def menu_tables():
             print("Invalid choice. Please enter a valid menu item.")
 
 
-def menu_full():
+def menu_categories():
     while True:
         print("Menu")
         print("1. Appetizers")
