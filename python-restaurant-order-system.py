@@ -186,8 +186,7 @@ def view_order():
     global orders
     print("Please enter order id: ")
     choice = input()
-    order_id = int(choice)
-    index = find_order_by_id(order_id)
+    index = find_order_by_id(int(choice))
     if index != -1:
         orders[index].show_order()
         print(f"Total: ${orders[index].get_total()}")
@@ -199,14 +198,16 @@ def update_order():
     global orders
     print("Please enter order id: ")
     choice = input()
-    order_id = int(choice)
-    index = find_order_by_id(order_id)
+    index = find_order_by_id(int(choice))
+    if orders[index].is_active == False:
+        print("Order closed, cannot be updated.")
+        return
     if index != -1:
         active_order_id = orders[index].order_id
         orders[index].show_order()
         print(f"Total: ${orders[index].get_total()}")
         print(active_order_id)
-        menu_food()
+        menu_full()
     else:
         print("Order not found")
 
@@ -214,8 +215,7 @@ def close_order():
     global orders
     print("Please enter order id: ")
     choice = input()
-    order_id = int(choice)
-    order_index = find_order_by_id(order_id)
+    order_index = find_order_by_id(int(choice))
     table_index = find_table_by_id(orders[order_index].table_id)
     if order_index != -1:
         active_order_id = orders[order_index].order_id
@@ -241,21 +241,23 @@ def print_menu(title, category, category_singular):
         if choice == "0":
             break
         elif choice.isdigit() and int(choice) <= len(category):
-            option(category[int(choice) - 1])
+            menu_confirmation(category[int(choice) - 1])
         else:
             print("Invalid choice. Please enter a valid menu item.")
 
 
-def option(item):
-    print(f"Would you like to add {item.get_name()} to your order? (y/n)")
-    yesorno = input() 
-    match yesorno:
-        case "y":
-            orders[find_order_by_id(active_order_id)].add_item(item)
-        case "n":
-            return    
-        case _:
-            print("Invalid choice. Please choose y(es) or n(o).")
+def menu_confirmation(item):
+    while True:
+        print(f"Would you like to add {item.get_name()} to your order? (y/n)")
+        yesorno = input() 
+        match yesorno:
+            case "y":
+                orders[find_order_by_id(active_order_id)].add_item(item)
+                return
+            case "n":
+                return    
+            case _:
+                print("Invalid choice. Please choose y(es) or n(o).")
 
 def menu_main():
     while True:
@@ -270,7 +272,7 @@ def menu_main():
             case "1":
                 create_new_order()
                 menu_tables()
-                menu_food()
+                menu_full()
             case "2":
                 view_order()
             case "3":
@@ -290,11 +292,14 @@ def menu_tables():
             if table.is_available:
                 available_tables.append(table)
         print("Available tables")
-        i = 0
-        for table in available_tables:
-            i += 1
-            print(f"{i}.  Table {table.table_id}")
-            shown_tables.setdefault(i, table.table_id)
+        if len(available_tables) == 0:
+            print("There are no available tables.")
+        else:
+            i = 0
+            for table in available_tables:
+                i += 1
+                print(f"{i}.  Table {table.table_id}")
+                shown_tables.setdefault(i, table.table_id)
         print("0. Go back")
         print(shown_tables)
         choice = input()
@@ -306,7 +311,7 @@ def menu_tables():
         else:
             print("Invalid choice. Please enter a valid menu item.")
 
-def menu_food():
+def menu_full():
     while True:
         print("Menu")
         print("1. Appetizers")
@@ -327,7 +332,7 @@ def menu_food():
             case "0":
                 break
             case _:
-                print("invalid choice. Please enter a valid menu item.")
+                print("Invalid choice. Please enter a valid menu item.")
 
 def menu_appetizers():
     print_menu("Appetizers", appetizers, Appetizer)
